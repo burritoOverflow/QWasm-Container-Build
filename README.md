@@ -6,4 +6,4 @@ An `id1` subdirectory populated with `pak` files at this project's root is a bui
 
 __Note:__ This uses the software-rendered approach, outlined in the QWasm docs.
 
-For ease of serving the assets locally, you can use the included `nginx` `Dockerfile`; running `run-server.sh` builds the image, copies the assets, and starts the container.
+For ease of serving the assets locally, you can use the included `nginx` `Dockerfile`; running `run-server.sh` builds the image, mounts the assets, and starts the container.

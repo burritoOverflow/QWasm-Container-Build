@@ -5,6 +5,7 @@ set -e
 IMAGE_NAME="qwasm-nginx"
 CONTAINER_NAME="qwasm-server"
 PORT="${PORT:-8080}"
+# location of the build assets for Qwasm
 DIST_DIR="$(pwd)/dist"
 
 if [ ! -d "${DIST_DIR}" ]; then
@@ -14,16 +15,23 @@ if [ ! -d "${DIST_DIR}" ]; then
 fi
 
 if podman ps -a --format "{{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
-    echo "Stopping existing container..."
-    podman stop "${CONTAINER_NAME}" || true
-    podman rm "${CONTAINER_NAME}" || true
+    echo "Stopping and removing existing container..."
+    podman stop "${CONTAINER_NAME}" >/dev/null
+    podman rm "${CONTAINER_NAME}" >/dev/null
 fi
 
-echo "Building nginx image..."
-podman build -f Dockerfile.nginx -t "${IMAGE_NAME}" .
+if ! podman image exists "${IMAGE_NAME}"; then
+    echo "Building nginx image..."
+    podman build -f Dockerfile.nginx -t "${IMAGE_NAME}" .
+else
+    echo "Using existing nginx image '${IMAGE_NAME}'."
+fi
 
 echo "Starting nginx container on port ${PORT}..."
 podman run -d \
     --name "${CONTAINER_NAME}" \
     -p "${PORT}:8080" \
+    -v "${DIST_DIR}:/usr/share/nginx/html:ro,z" \
     "${IMAGE_NAME}"
+
+echo "Server is running. View logs with: podman logs -f ${CONTAINER_NAME}"

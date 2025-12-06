@@ -4,8 +4,14 @@ RUN apk add --no-cache nginx nginx-mod-http-brotli
 
 COPY nginx.conf /etc/nginx/http.d/qwasm.conf
 
+# Create the web root directory.
+# We will populate it via a volume mount.
 RUN mkdir -p /usr/share/nginx/html
-COPY dist/ /usr/share/nginx/html/
+
+# forward nginx logs so Docker/Podman can capture them
+# see: https://github.com/jessfraz/dockerfiles/blob/master/nginx-extras/Dockerfile#L12-L14
+RUN ln -sf /dev/stdout /var/log/nginx/access.log \
+	&& ln -sf /dev/stderr /var/log/nginx/error.log
 
 EXPOSE 8080
 
