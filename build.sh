@@ -37,7 +37,7 @@ for variant in soft gl; do
     done
 done
 
-# for the 'landing page'
+# for the 'landing page' at the source root
 echo "Copying static site assets..."
 cp index.html "${DIST_DIR}/"
 cp style.css "${DIST_DIR}/"

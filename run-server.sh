@@ -36,6 +36,12 @@ else
     echo "Using existing nginx image '${IMAGE_NAME}'."
 fi
 
+# NOTE: this is also done in the build script, but it's more likely
+# that files could be changed between builds, so we do it again here.
+echo "Copying landing page assets..."
+cp index.html "${DIST_DIR}/"
+cp style.css "${DIST_DIR}/"
+
 echo "Starting nginx container on port ${PORT}..."
 podman run -d \
     --name "${CONTAINER_NAME}" \
