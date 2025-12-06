@@ -4,6 +4,7 @@ RUN dnf install -y \
     clang \
     make \
     git \
+    brotli \
     && dnf clean all
 
 WORKDIR /opt
@@ -28,3 +29,9 @@ COPY id1 ./id1/
 
 RUN . $EMSDK_DIR/emsdk_env.sh && \
     make -f Makefile.emscripten
+
+# Compress build assets
+RUN for f in index.html index.js index.wasm index.data; do \
+        gzip -k -9 "$f"; \
+        brotli -k -Z "$f"; \
+    done

@@ -21,8 +21,11 @@ trap cleanup EXIT
 
 echo "Copying build assets to ${DIST_DIR}"
 mkdir -p "${DIST_DIR}"
+
 for f in index.html index.js index.wasm index.data; do
     podman cp "${CID}:/opt/quake-wasm/WinQuake/${f}" "${DIST_DIR}/"
+    podman cp "${CID}:/opt/quake-wasm/WinQuake/${f}.gz" "${DIST_DIR}/"
+    podman cp "${CID}:/opt/quake-wasm/WinQuake/${f}.br" "${DIST_DIR}/"
 done
 
 echo "Build complete. Assets are in ${DIST_DIR}"
