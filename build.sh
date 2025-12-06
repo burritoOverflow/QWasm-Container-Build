@@ -38,9 +38,11 @@ for variant in soft gl; do
 done
 
 # for the 'landing page' at the source root
-echo "Copying static site assets..."
+echo "Copying static landing page assets..."
 cp index.html "${DIST_DIR}/"
 cp style.css "${DIST_DIR}/"
 
 echo "Build complete. Assets are in ${DIST_DIR}"
-ls -ltsh "${DIST_DIR}"
+ls -ltshR "${DIST_DIR}"
+
+printf "Total size: %s\n" "$(du -sh "${DIST_DIR}" | cut -f1)"

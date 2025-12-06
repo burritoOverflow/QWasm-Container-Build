@@ -1,3 +1,4 @@
+# responsible for building Qwasm with both software rendering and WebGL support
 FROM fedora:42
 
 RUN dnf install -y \
@@ -21,7 +22,8 @@ WORKDIR $EMSDK_DIR
 RUN ./emsdk install latest
 RUN ./emsdk activate latest
 
-# Build gl4es
+# Build gl4es--this is a dependency for Qwasm's WebGL renderer
+# See: https://github.com/ptitSeb/gl4es/blob/master/COMPILE.md#emscripten
 RUN git clone https://github.com/ptitSeb/gl4es.git $GL4ES_DIR
 WORKDIR $GL4ES_DIR
 RUN . $EMSDK_DIR/emsdk_env.sh && \
@@ -36,6 +38,7 @@ RUN . $EMSDK_DIR/emsdk_env.sh && \
 RUN git clone https://github.com/GMH-Code/Qwasm.git $QWASM_DIR
 
 # see: https://github.com/GMH-Code/Qwasm/blob/master/README.md#building-software-rendered-qwasm-on-linux
+# this applies to both the software-rendered and WebGL builds
 WORKDIR $QWASM_DIR/WinQuake
 
 COPY id1 ./id1/
