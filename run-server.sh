@@ -19,6 +19,7 @@ fi
 # always rebuild the image if --rebuild longopt is present
 for arg in "$@"; do
     if [ "$arg" == "--rebuild" ]; then
+        echo "Forcing nginx image rebuild..."
         FORCE_REBUILD=1
     fi
 done
