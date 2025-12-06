@@ -7,6 +7,8 @@ CONTAINER_NAME="qwasm-server"
 PORT="${PORT:-8080}"
 # location of the build assets for Qwasm
 DIST_DIR="$(pwd)/dist"
+# use existing image by default
+FORCE_REBUILD=0
 
 if [ ! -d "${DIST_DIR}" ]; then
     echo "Error: '${DIST_DIR}' directory not found." >&2
@@ -14,13 +16,20 @@ if [ ! -d "${DIST_DIR}" ]; then
     exit 1
 fi
 
+# always rebuild the image if --rebuild longopt is present
+for arg in "$@"; do
+    if [ "$arg" == "--rebuild" ]; then
+        FORCE_REBUILD=1
+    fi
+done
+
 if podman ps -a --format "{{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
     echo "Stopping and removing existing container..."
     podman stop "${CONTAINER_NAME}" >/dev/null
     podman rm "${CONTAINER_NAME}" >/dev/null
 fi
 
-if ! podman image exists "${IMAGE_NAME}"; then
+if [ "$FORCE_REBUILD" -eq 1 ] || ! podman image exists "${IMAGE_NAME}"; then
     echo "Building nginx image..."
     podman build -f Dockerfile.nginx -t "${IMAGE_NAME}" .
 else

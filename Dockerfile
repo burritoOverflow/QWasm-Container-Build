@@ -3,6 +3,7 @@ FROM fedora:42
 RUN dnf install -y \
     clang \
     make \
+    cmake \
     git \
     brotli \
     && dnf clean all
@@ -11,6 +12,7 @@ WORKDIR /opt
 
 ENV EMSDK_DIR=/opt/emsdk
 ENV QWASM_DIR=/opt/quake-wasm
+ENV GL4ES_DIR=/opt/gl4es
 
 RUN git clone https://github.com/emscripten-core/emsdk.git $EMSDK_DIR
 
@@ -18,6 +20,17 @@ RUN git clone https://github.com/emscripten-core/emsdk.git $EMSDK_DIR
 WORKDIR $EMSDK_DIR
 RUN ./emsdk install latest
 RUN ./emsdk activate latest
+
+# Build gl4es
+RUN git clone https://github.com/ptitSeb/gl4es.git $GL4ES_DIR
+WORKDIR $GL4ES_DIR
+RUN . $EMSDK_DIR/emsdk_env.sh && \
+    emcmake cmake -S . -B build \
+        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+        -DNOX11=ON \
+        -DNOEGL=ON \
+        -DSTATICLIB=ON && \
+    make VERBOSE=1 -C build
 
 # clone and build Qwasm
 RUN git clone https://github.com/GMH-Code/Qwasm.git $QWASM_DIR
@@ -27,11 +40,25 @@ WORKDIR $QWASM_DIR/WinQuake
 
 COPY id1 ./id1/
 
+# Build Software-Rendered version; clean afterwards to prepare for next build
 RUN . $EMSDK_DIR/emsdk_env.sh && \
-    make -f Makefile.emscripten
+    make -f Makefile.emscripten && \
+    mkdir -p release/soft && \
+    mv index.html index.js index.wasm index.data release/soft/ && \
+    make -f Makefile.emscripten clean
 
-# Compress build assets
-RUN for f in index.html index.js index.wasm index.data; do \
-        gzip -k -9 "$f"; \
-        brotli -k -Z "$f"; \
+# Build WebGL version
+RUN . $EMSDK_DIR/emsdk_env.sh && \
+    make -f Makefile.emscripten GL4ES_PATH=$GL4ES_DIR && \
+    mkdir -p release/gl && \
+    mv index.html index.js index.wasm index.data release/gl/
+
+# Compress build assets for each version
+RUN for dir in release/soft release/gl; do \
+        cd "$dir" && \
+        for f in index.html index.js index.wasm index.data; do \
+            gzip -k -9 "$f"; \
+            brotli -k -Z "$f"; \
+        done && \
+        cd -; \
     done
