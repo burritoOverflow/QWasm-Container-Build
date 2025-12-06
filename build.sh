@@ -14,7 +14,7 @@ podman build -t "${IMAGE_NAME}" .
 CID=$(podman create "${IMAGE_NAME}")
 
 cleanup() {
-    echo "Removing temporary container ${CID}"
+    echo "Removing temporary container '${CID}'"
     podman rm "${CID}"
 }
 trap cleanup EXIT
