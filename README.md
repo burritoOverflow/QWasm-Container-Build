@@ -8,6 +8,8 @@ __Note:__ This builds both the software-rendered and the hardware-rendered appro
 
 For ease of serving the assets locally, you can use the included `nginx` `Dockerfile`; running `run-server.sh` builds the image specified in this `Dockerfile`, mounts the assets, and starts the container serving both build variants via a 'landing page'.
 
+_NOTE:_ Pass the `rebuild` longopt when running this script to force a rebuild of the `nginx` image, otherwise the existing image will be used (unless no image exists).
+
 The contents of the `dist/` directory after successful build(s) should look like the following:
 
 ```bash
