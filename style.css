@@ -21,16 +21,30 @@ body {
     margin: 0;
 }
 
+@keyframes dropDown {
+    from {
+        transform: translateY(-100vh);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 .container {
     text-align: center;
     background: var(--card-bg);
     padding: 3.5rem;
     border-radius: 12px;
     box-shadow:
-        0 0 0 1px #333,
+        0 0 0 3px var(--accent-dark)
         0 20px 50px var(--shadow-color);
     min-width: 320px;
     max-width: 400px;
+
+    animation: dropDown 555ms ease-out;
 
     h1 {
         margin-top: 0;
@@ -49,6 +63,7 @@ body {
 
         li {
             margin: 1.5rem 0;
+            border: 2px solid var(--card-bg);
         }
     }
 }
@@ -77,10 +92,10 @@ a {
         0 5px 10px var(--shadow-color);
     /* Drop shadow */
 
-    transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.2s;
+    transition: transform 0.7s ease, box-shadow 0.1s ease, filter 0.2s;
 
     &:hover {
-        transform: translateY(-2px);
+        transform: translate(-2%, -5%);
         filter: brightness(1.1);
         box-shadow:
             inset 0 1px 0 rgba(255, 255, 255, 0.2),
