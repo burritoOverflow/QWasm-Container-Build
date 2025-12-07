@@ -15,9 +15,23 @@ while [[ $# -gt 0 ]]; do
             CLEAN=true
             shift
             ;;
+        --rebuild)
+            # force rebuild of the container image
+            REBUILD=true
+            shift
+            ;;
+        --dest)
+            # we only want relative 'dist' directories here
+            if [[ "$2" = /* ]]; then
+                echo "Error: --dest must be a relative path, not absolute" >&2
+                exit 1
+            fi
+            DIST_DIR="$(pwd)/$2"
+            shift 2
+            ;;
         *)
             echo "Unknown option: $1" >&2
-            echo "Usage: $0 [--clean]" >&2
+            echo "Usage: $0 [--clean] [--dest <directory>]" >&2
             exit 1
             ;;
     esac
@@ -25,6 +39,9 @@ done
 
 # clean previous build artifacts; perhaps this should be the default?
 if [[ "$CLEAN" == true ]]; then
+    # WARN: this cleans the directory provided via the arg and will leave older
+    # directories intact if a different `--dest`` is provided
+    # than was used previously.
     echo "Cleaning '${DIST_DIR}'"
     rm -rf "${DIST_DIR}"
 fi
@@ -35,7 +52,12 @@ if ! compgen -G "*.pak" > /dev/null; then
     exit 1
 fi
 
-podman build -t "${IMAGE_NAME}" .
+BUILD_FLAGS=()
+if [[ "$REBUILD" == true ]]; then
+    BUILD_FLAGS+=(--no-cache)
+fi
+
+podman build "${BUILD_FLAGS[@]}" -t "${IMAGE_NAME}" .
 CID=$(podman create "${IMAGE_NAME}")
 
 cleanup() {

@@ -1,6 +1,6 @@
 A simple container for building the [WASM Quake2 port](https://github.com/GMH-Code/Qwasm2).
 
-Running `build.sh` builds and runs a container that pulls dependencies and builds `qwasm2`. Upon a successful build, the build assets are copied to the host, under `dist/`.
+Running `build.sh` builds and runs a container that pulls dependencies and builds `qwasm2`. Upon a successful build, the build assets are copied to the host, under `dist/`. Provide a relative path via `--dest` if a different directory is desired. The `--rebuild` flag ignores cache when rebuilding the image.
 
 __NOTE__: These assets are uncompressed and are copied to the host in their original state. Ideally, these should be compressed before serving them.
 
