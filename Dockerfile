@@ -44,6 +44,6 @@ WORKDIR $QWASM2_DIR
 COPY *.pak wasm/baseq2/
 
 RUN . $EMSDK_DIR/emsdk_env.sh && \
-    emmake make GL4ES_PATH=$GL4ES_DIR VERBOSE=ON $([ "$PARALLEL" = "1" ] && echo "-j$(nproc)")
+    emmake make GL4ES_PATH=$GL4ES_DIR VERBOSE=1 $([ "$PARALLEL" = "1" ] && echo "-j$(nproc)")
 
 RUN ls -lR release/
