@@ -20,6 +20,10 @@ while [[ $# -gt 0 ]]; do
             REBUILD=true
             shift
             ;;
+        --parallel)
+            PARALLEL=true # perform the build(s) in parallel--passed to `make` for both gl4es and qwasm2.
+            shift
+            ;;
         --dest)
             # we only want relative 'dist' directories here
             if [[ "$2" = /* ]]; then
@@ -27,6 +31,7 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             fi
             DIST_DIR="$(pwd)/$2"
+            echo "Setting output directory to '${DIST_DIR}'"
             shift 2
             ;;
         *)
@@ -55,6 +60,9 @@ fi
 BUILD_FLAGS=()
 if [[ "$REBUILD" == true ]]; then
     BUILD_FLAGS+=(--no-cache)
+fi
+if [[ "$PARALLEL" == true ]]; then
+    BUILD_FLAGS+=(--build-arg PARALLEL=1)
 fi
 
 podman build "${BUILD_FLAGS[@]}" -t "${IMAGE_NAME}" .

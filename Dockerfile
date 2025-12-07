@@ -13,6 +13,8 @@ ENV EMSDK_DIR=/opt/emsdk
 ENV QWASM2_DIR=/opt/qwasm2
 ENV GL4ES_DIR=/opt/gl4es
 
+ARG PARALLEL=0
+
 RUN git clone https://github.com/emscripten-core/emsdk.git $EMSDK_DIR
 
 # set up emsdk
@@ -31,7 +33,7 @@ RUN . $EMSDK_DIR/emsdk_env.sh && \
         -DNOEGL=ON \
         -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
         -DSTATICLIB=ON && \
-    make VERBOSE=1 -C build
+    make VERBOSE=1 -C build $([ "$PARALLEL" = "1" ] && echo "-j$(nproc)")
 
 # clone Qwasm2
 RUN git clone https://github.com/GMH-Code/Qwasm2.git $QWASM2_DIR
@@ -42,6 +44,6 @@ WORKDIR $QWASM2_DIR
 COPY *.pak wasm/baseq2/
 
 RUN . $EMSDK_DIR/emsdk_env.sh && \
-    emmake make GL4ES_PATH=$GL4ES_DIR VERBOSE=ON
+    emmake make GL4ES_PATH=$GL4ES_DIR VERBOSE=ON $([ "$PARALLEL" = "1" ] && echo "-j$(nproc)")
 
 RUN ls -lR release/
