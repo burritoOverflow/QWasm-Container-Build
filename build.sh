@@ -15,6 +15,11 @@ while [[ $# -gt 0 ]]; do
             CLEAN=true
             shift
             ;;
+        --compress)
+            # compress build artifacts using gzip and brotli
+            COMPRESS=true
+            shift
+            ;;
         --rebuild)
             # force rebuild of the container image
             REBUILD=true
@@ -36,7 +41,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown option: $1" >&2
-            echo "Usage: $0 [--clean] [--dest <directory>]" >&2
+            echo "Usage: $0 [--clean] [--compress] [--rebuild] [--parallel] [--dest <directory>]" >&2
             exit 1
             ;;
     esac
@@ -58,11 +63,20 @@ if ! compgen -G "*.pak" > /dev/null; then
 fi
 
 BUILD_FLAGS=()
+
+# ignore cache if requested, forcing a full rebuild of the image
 if [[ "$REBUILD" == true ]]; then
     BUILD_FLAGS+=(--no-cache)
 fi
+
+# perform parallel builds for gl4es and qwasm2
 if [[ "$PARALLEL" == true ]]; then
     BUILD_FLAGS+=(--build-arg PARALLEL=1)
+fi
+
+# compress build artifacts with gzip and brotli
+if [[ "$COMPRESS" == true ]]; then
+    BUILD_FLAGS+=(--build-arg COMPRESS=1)
 fi
 
 podman build "${BUILD_FLAGS[@]}" -t "${IMAGE_NAME}" .

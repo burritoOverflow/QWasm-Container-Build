@@ -2,7 +2,7 @@ A simple container for building the [WASM Quake2 port](https://github.com/GMH-Co
 
 Running `build.sh` builds and runs a container that pulls dependencies and builds `qwasm2`. Upon a successful build, the build assets are copied to the host, under `dist/`. Provide a relative path via `--dest` if a different directory is desired. The `--rebuild` flag ignores cache when rebuilding the image.
 
-__NOTE__: These assets are uncompressed and are copied to the host in their original state. Ideally, these should be compressed before serving them.
+__NOTE__: These assets are uncompressed by deafult and are copied to the host in their original state. Pass the  `--compress` flag to compress with both `gzip` and `brotli`.
 
 For the game to properly boot, it requires `PAK` fies present in the project's `wasm/baseq2` subdirectory (at build time).
 
