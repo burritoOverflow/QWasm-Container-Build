@@ -5,8 +5,10 @@ set -e
 IMAGE_NAME="qwasm-nginx"
 CONTAINER_NAME="qwasm-server"
 PORT="${PORT:-8080}"
+
 # location of the build assets for Qwasm
 DIST_DIR="$(pwd)/dist"
+
 # use existing image by default
 FORCE_REBUILD=0
 
