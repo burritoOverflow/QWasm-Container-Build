@@ -7,6 +7,7 @@ RUN dnf install -y \
     cmake \
     git \
     brotli \
+    bc \
     && dnf clean all
 
 WORKDIR /opt
@@ -56,12 +57,7 @@ RUN . $EMSDK_DIR/emsdk_env.sh && \
     mkdir -p release/gl && \
     mv index.html index.js index.wasm index.data release/gl/
 
-# Compress build assets for each version
-RUN for dir in release/soft release/gl; do \
-        cd "$dir" && \
-        for f in index.html index.js index.wasm index.data; do \
-            gzip -k -9 "$f"; \
-            brotli -k -Z "$f"; \
-        done && \
-        cd -; \
-    done
+COPY compress.sh .
+RUN chmod +x compress.sh && \
+    find release -type f \( -name "*.html" -o -name "*.js" -o -name "*.wasm" -o -name "*.data" \) -print0 | \
+    xargs -0 -P "$(nproc)" -I {} ./compress.sh "{}"
