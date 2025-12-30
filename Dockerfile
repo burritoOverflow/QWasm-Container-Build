@@ -9,39 +9,28 @@ RUN dnf install -y \
 
 WORKDIR /opt
 
+# set up emsdk
 ENV EMSDK_DIR=/opt/emsdk
-ENV QWASM2_DIR=/opt/qwasm2
-ENV GL4ES_DIR=/opt/gl4es
-
 RUN git clone https://github.com/emscripten-core/emsdk.git $EMSDK_DIR
 
-# set up emsdk
 WORKDIR $EMSDK_DIR
 RUN ./emsdk install latest
 RUN ./emsdk activate latest
 
-RUN git clone https://github.com/ptitSeb/gl4es.git $GL4ES_DIR
+ENV IOQUAKE3_DIR=/opt/ioquake3
+RUN git clone https://github.com/ioquake/ioq3.git $IOQUAKE3_DIR
 
-# build gl4es (with -fPIC) as per: https://github.com/GMH-Code/Qwasm2?tab=readme-ov-file#how-to-build-on-linux-for-webassembly
-WORKDIR $GL4ES_DIR
-RUN . $EMSDK_DIR/emsdk_env.sh && \
-    emcmake cmake -S . -B build \
-        -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-        -DNOX11=ON \
-        -DNOEGL=ON \
-        -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-        -DSTATICLIB=ON && \
-    make VERBOSE=1 -C build
-
-# clone Qwasm2
-RUN git clone https://github.com/GMH-Code/Qwasm2.git $QWASM2_DIR
-
-WORKDIR $QWASM2_DIR
-
-# populate the required pak files to the source tree. See docs ref'd above.
-COPY *.pak wasm/baseq2/
+WORKDIR $IOQUAKE3_DIR
 
 RUN . $EMSDK_DIR/emsdk_env.sh && \
-    emmake make GL4ES_PATH=$GL4ES_DIR VERBOSE=ON
+    emcmake cmake \
+        -S . \
+        -B build-wasm \
+        -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build build-wasm --parallel
 
-RUN ls -lR release/
+# build assets are in the build-wasm/<CMAKE_BUILD_TYPE> directory
+RUN ls -lR build-wasm/Release/
+
+# populate the required pk3 files to the build tree
+COPY baseq3/*.pk3 build-wasm/Release/baseq3/

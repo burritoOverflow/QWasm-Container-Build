@@ -2,11 +2,10 @@
 
 set -e
 
-IMAGE_NAME="qwasm2-build"
+IMAGE_NAME="ioquake3-build"
+
 # output directory on host
 DIST_DIR="$(pwd)/dist"
-# source directory inside the container
-QWASM_CONTAINER_DIR="/opt/qwasm2"
 
 CLEAN=false
 while [[ $# -gt 0 ]]; do
@@ -31,7 +30,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "Unknown option: $1" >&2
-            echo "Usage: $0 [--clean] [--dest <directory>]" >&2
+            echo "Usage: $0 [--clean] [--rebuild] [--dest <directory>]" >&2
             exit 1
             ;;
     esac
@@ -46,9 +45,11 @@ if [[ "$CLEAN" == true ]]; then
     rm -rf "${DIST_DIR}"
 fi
 
-# we require .pak files to build properly, expected at src root
-if ! compgen -G "*.pak" > /dev/null; then
-    echo "Error: No .pak files found in current directory." >&2
+# we require .pk3 files to build properly,
+# expected in a 'baseq3' directory at the source root
+if ! compgen -G "baseq3/*.pk3" > /dev/null; then
+    echo "Error: No .pk3 files found in 'baseq3' directory." >&2
+    echo "Please ensure the 'baseq3' directory exists and contains the required .pk3 files." >&2
     exit 1
 fi
 
@@ -68,7 +69,14 @@ trap cleanup EXIT
 
 echo "Copying build assets to ${DIST_DIR}"
 mkdir -p "${DIST_DIR}"
-podman cp "${CID}:${QWASM_CONTAINER_DIR}/release/." "${DIST_DIR}/"
+
+# source directory inside the container
+IOQ3_CONTAINER_DIR="/opt/ioquake3"
+
+# build directory is at build-wasm/Release
+BUILD_DIR="${IOQ3_CONTAINER_DIR}/build-wasm/Release"
+
+podman cp "${CID}:${BUILD_DIR}/." "${DIST_DIR}/"
 
 echo "Build complete. Assets are in ${DIST_DIR}"
 ls -l "${DIST_DIR}"
